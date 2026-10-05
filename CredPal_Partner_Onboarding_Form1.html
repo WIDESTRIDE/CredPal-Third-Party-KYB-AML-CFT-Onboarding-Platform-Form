@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CredPal Partner Onboarding</title>
+<link rel="icon" type="image/png" href="images/logo-blue.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#2851EE; --blue-d:#1A37C2; --blue-dd:#10237F; --blue-50:#EEF2FF; --blue-100:#DCE4FF;
+    --ink:#0E1A3B; --ink-2:#33405F; --muted:#6A7695; --line:#DCE2EF; --line-2:#C9D2E6;
+    --bg:#F3F5FB; --card:#FFFFFF; --ok:#0FA36B; --ok-50:#E6F7F0; --err:#D6383F; --err-50:#FDECEC;
+    --warn:#B7791F; --warn-50:#FFF6E5;
+    --r:12px; --r-lg:18px;
+    --shadow:0 1px 2px rgba(14,26,59,.04),0 8px 28px rgba(14,26,59,.06);
+    --font:'Lato','Calibri Light',Calibri,'Segoe UI',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--font);font-size:15px;line-height:1.55;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font:inherit;color:inherit}
+  a{color:var(--blue)}
+
+  /* ---------- layout ---------- */
+  .app{display:grid;grid-template-columns:340px 1fr;min-height:100vh}
+  .aside{position:sticky;top:0;height:100vh;background:linear-gradient(160deg,var(--blue) 0%,var(--blue-d) 55%,var(--blue-dd) 100%);color:#fff;padding:34px 28px 26px;display:flex;flex-direction:column;overflow:hidden}
+  .aside::before,.aside::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.12);pointer-events:none}
+  .aside::before{width:420px;height:420px;right:-210px;bottom:-120px}
+  .aside::after{width:260px;height:260px;right:-130px;bottom:-40px;border-color:rgba(255,255,255,.08)}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+  .brand img{width:42px;height:42px}
+  .brand b{font-weight:900;letter-spacing:.14em;font-size:15px}
+  .brand span{display:block;font-size:12px;font-weight:300;opacity:.8;letter-spacing:.02em}
+  .aside h1{font-weight:300;font-size:27px;line-height:1.2;margin-bottom:10px}
+  .aside h1 strong{font-weight:700}
+  .aside p.lead{font-size:14px;font-weight:300;opacity:.85;margin-bottom:28px;max-width:260px}
+  .stepper{list-style:none;position:relative;flex:1;overflow:auto;margin-right:-10px;padding-right:10px}
+  .stepper li{display:flex;align-items:center;gap:14px;padding:8px 0;font-size:14px;opacity:.6;cursor:default;position:relative;transition:opacity .2s}
+  .stepper li:not(:last-child)::after{content:"";position:absolute;left:14px;top:38px;width:1px;height:calc(100% - 30px);background:rgba(255,255,255,.25)}
+  .stepper li .dot{flex:0 0 29px;height:29px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);display:grid;place-items:center;font-size:12px;font-weight:700;transition:all .2s}
+  .stepper li.done{opacity:.9;cursor:pointer}
+  .stepper li.done .dot{background:rgba(255,255,255,.18);border-color:transparent}
+  .stepper li.active{opacity:1;font-weight:700}
+  .stepper li.active .dot{background:#fff;color:var(--blue);border-color:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.18)}
+  .stepper li.done:hover{opacity:1}
+  .aside .foot{font-size:12px;font-weight:300;opacity:.7;margin-top:18px;display:flex;gap:8px;align-items:flex-start}
+  .aside .foot svg{flex:0 0 16px;margin-top:2px}
+
+  .main{padding:44px clamp(16px,5vw,72px) 60px;max-width:1040px;width:100%}
+  .topbar{display:none}
+  .progress{height:4px;border-radius:4px;background:var(--line);overflow:hidden;margin-bottom:26px}
+  .progress i{display:block;height:100%;background:var(--blue);width:0;transition:width .35s ease}
+  .step-head{margin-bottom:22px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+  .step-head h2{font-size:30px;font-weight:300;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+  .step-head p{color:var(--muted);max-width:640px}
+
+  .card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:28px;margin-bottom:18px;border:1px solid rgba(220,226,239,.6)}
+  .card h3{font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  .card h3 .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--blue-50);color:var(--blue);border-radius:20px;padding:3px 9px}
+  .card .sub{font-size:13.5px;color:var(--muted);margin-bottom:18px}
+
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px}
+  .grid .full{grid-column:1/-1}
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .field>label,.field>.lbl{font-size:13.5px;font-weight:700;color:var(--ink-2)}
+  .field .req::after{content:" *";color:var(--err)}
+  .field .hint{font-size:12.5px;color:var(--muted);margin-top:-2px}
+  input[type=text],input[type=email],input[type=tel],input[type=url],input[type=date],input[type=number],select,textarea{
+    width:100%;background:#FBFCFF;border:1px solid var(--line);border-radius:var(--r);padding:11px 14px;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s,background .15s}
+  textarea{min-height:92px;resize:vertical}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%236A7695' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+  input:hover,select:hover,textarea:hover{border-color:var(--line-2)}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(40,81,238,.12)}
+  ::placeholder{color:#A3ADC6}
+
+  /* segmented yes/no */
+  .seg{display:flex;flex-wrap:wrap;gap:8px}
+  .seg label{position:relative;cursor:pointer}
+  .seg input{position:absolute;opacity:0;pointer-events:none}
+  .seg span{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border:1px solid var(--line);border-radius:30px;font-size:14px;background:#FBFCFF;transition:all .15s;user-select:none}
+  .seg span::before{content:"";width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line-2);transition:all .15s}
+  .seg label:hover span{border-color:var(--line-2)}
+  .seg input:checked+span{border-color:var(--blue);background:var(--blue-50);color:var(--blue);font-weight:700}
+  .seg input:checked+span::before{border:4.5px solid var(--blue);background:#fff}
+  .seg input:focus-visible+span{box-shadow:0 0 0 4px rgba(40,81,238,.15)}
+
+  /* question rows */
+  .q{display:grid;grid-template-columns:1fr auto;gap:12px 24px;align-items:center;padding:15px 0;border-bottom:1px solid #EEF1F7}
+  .q:last-child{border-bottom:0}
+  .q .qt{font-size:14.5px}
+  .q .qt b{color:var(--blue);font-weight:700;margin-right:6px}
+  .q .err-msg{grid-column:1/-1}
+
+  /* checkbox */
+  .check{display:flex;gap:12px;align-items:flex-start;cursor:pointer;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);background:#FBFCFF;transition:all .15s}
+  .check:hover{border-color:var(--line-2)}
+  .check input{appearance:none;flex:0 0 20px;height:20px;border:1.5px solid var(--line-2);border-radius:6px;margin-top:1px;display:grid;place-items:center;transition:all .15s;background:#fff}
+  .check input:checked{background:var(--blue);border-color:var(--blue)}
+  .check input:checked::after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .check:has(input:checked){border-color:var(--blue);background:var(--blue-50)}
+  .check span{font-size:14px;color:var(--ink-2)}
+
+  /* file drop */
+  .drop{position:relative;border:1.5px dashed var(--line-2);border-radius:var(--r);background:#FBFCFF;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s}
+  .drop:hover,.drop.over{border-color:var(--blue);background:var(--blue-50)}
+  .drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .drop .ic{flex:0 0 40px;height:40px;border-radius:10px;background:var(--blue-50);color:var(--blue);display:grid;place-items:center}
+  .drop .tx{font-size:13.5px;min-width:0}
+  .drop .tx b{display:block;color:var(--ink);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .drop .tx small{color:var(--muted)}
+  .drop.has{border-style:solid;border-color:var(--ok);background:var(--ok-50)}
+  .drop.has .ic{background:#fff;color:var(--ok)}
+
+  /* chips */
+  .chips-wrap{display:flex;gap:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-50);color:var(--blue);border-radius:20px;padding:5px 8px 5px 12px;font-size:13px;font-weight:700}
+  .chip button{border:0;background:transparent;color:var(--blue);cursor:pointer;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:14px;line-height:1}
+  .chip button:hover{background:var(--blue-100)}
+
+  /* repeaters */
+  .rep-item{border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;margin-bottom:14px;background:#fff;animation:pop .25s ease}
+  .rep-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .rep-head h4{font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px}
+  .rep-head h4 .n{width:26px;height:26px;border-radius:8px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:12px}
+  .btn-x{border:0;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;padding:6px 10px;border-radius:8px}
+  .btn-x:hover{color:var(--err);background:var(--err-50)}
+  .btn-add{display:inline-flex;align-items:center;gap:8px;border:1.5px dashed var(--blue);color:var(--blue);background:transparent;border-radius:var(--r);padding:11px 18px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s}
+  .btn-add:hover{background:var(--blue-50)}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .note{display:flex;gap:12px;padding:14px 16px;border-radius:var(--r);background:var(--blue-50);color:var(--ink-2);font-size:13.5px;margin-bottom:18px}
+  .note svg{flex:0 0 18px;color:var(--blue);margin-top:2px}
+  .note.warn{background:var(--warn-50)}
+  .note.warn svg{color:var(--warn)}
+
+  /* validation */
+  .err-msg{display:none;font-size:12.5px;color:var(--err);font-weight:700}
+  .invalid .err-msg{display:block}
+  .invalid input,.invalid select,.invalid textarea{border-color:var(--err)!important;background:#FFFAFA}
+  .invalid .seg span,.invalid .drop,.invalid .check{border-color:var(--err)}
+
+  .is-hidden{display:none!important}
+
+  /* nav */
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:26px}
+  .btn{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:40px;padding:13px 26px;font-weight:700;font-size:15px;cursor:pointer;transition:all .15s}
+  .btn-primary{background:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(40,81,238,.25)}
+  .btn-primary:hover{background:var(--blue-d);transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:.6;cursor:wait;transform:none}
+  .btn-ghost{background:transparent;color:var(--ink-2)}
+  .btn-ghost:hover{background:#E8ECF6}
+  .nav .count{font-size:13px;color:var(--muted)}
+
+  /* review */
+  .rv-sec{margin-bottom:16px}
+  .rv-sec .rv-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .rv-sec h3{margin:0}
+  .rv-edit{border:0;background:var(--blue-50);color:var(--blue);font-weight:700;font-size:13px;padding:6px 14px;border-radius:20px;cursor:pointer}
+  .rv-edit:hover{background:var(--blue-100)}
+  .rv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 24px}
+  .rv-row{padding:8px 0;border-bottom:1px solid #F0F2F8;font-size:14px;min-width:0}
+  .rv-row dt{font-size:12px;color:var(--muted);margin-bottom:1px}
+  .rv-row dd{word-wrap:break-word}
+  .rv-row.full{grid-column:1/-1}
+  .rv-sub{grid-column:1/-1;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-top:14px;padding-bottom:4px}
+  .empty{color:#A3ADC6}
+
+  /* overlay + success */
+  .overlay{position:fixed;inset:0;background:rgba(14,26,59,.55);backdrop-filter:blur(4px);display:none;place-items:center;z-index:50;padding:16px}
+  .overlay.on{display:grid}
+  .ov-box{background:#fff;border-radius:var(--r-lg);padding:34px 36px;text-align:center;max-width:380px;width:100%}
+  .spin{width:46px;height:46px;border-radius:50%;border:4px solid var(--blue-100);border-top-color:var(--blue);animation:spin 1s linear infinite;margin:0 auto 16px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ov-box h4{font-size:18px;font-weight:700;margin-bottom:4px}
+  .ov-box p{color:var(--muted);font-size:14px}
+
+  .success{text-align:center;padding:60px 28px}
+  .success .tick{width:84px;height:84px;border-radius:50%;background:var(--ok-50);color:var(--ok);display:grid;place-items:center;margin:0 auto 22px}
+  .success h2{font-size:30px;font-weight:300;margin-bottom:8px}
+  .success p{color:var(--muted);max-width:480px;margin:0 auto 6px}
+  .ref{display:inline-block;margin:18px 0 8px;font-size:22px;font-weight:900;letter-spacing:.08em;color:var(--blue);background:var(--blue-50);padding:12px 26px;border-radius:14px}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;z-index:60;transition:transform .3s,opacity .3s,visibility .3s;max-width:calc(100% - 32px);opacity:0;visibility:hidden}
+  .toast.on{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .app{grid-template-columns:1fr}
+    .aside{display:none}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(120deg,var(--blue),var(--blue-d));color:#fff;padding:14px 16px;position:sticky;top:0;z-index:20}
+    .topbar .brand{margin:0}
+    .topbar .brand img{width:34px;height:34px}
+    .topbar .st{font-size:12.5px;opacity:.9;text-align:right}
+    .main{padding:24px 16px 48px}
+  }
+  @media (max-width:640px){
+    .grid,.rv-grid{grid-template-columns:1fr}
+    .card{padding:20px 16px}
+    .rep-item{padding:16px 14px}
+    .step-head h2{font-size:25px}
+    .q{grid-template-columns:1fr}
+    .nav .count{display:none}
+    .btn{padding:12px 20px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><img src="images/logo-white.png" alt="CredPal"><div><b>CREDPAL</b><span>Partner Onboarding</span></div></div>
+  <div class="st" id="mStep">Step 1 of 9</div>
+</div>
+
+<div class="app">
+  <aside class="aside">
+    <div class="brand"><img src="images/logo-white.png" alt="CredPal"><div><b>CREDPAL</b><span>Third-Party Onboarding</span></div></div>
+    <h1>Let's get you <strong>onboarded</strong></h1>
+    <p class="lead">This is CredPal's Know-Your-Business check for partners, vendors and service providers. Most businesses finish it in about 20 minutes.</p>
+    <ol class="stepper" id="stepper"></ol>
+    <div class="foot">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span>We only use what you share here for due diligence, AML/CFT and regulatory purposes.</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="progress"><i id="bar"></i></div>
+
+    <form id="kyb" novalidate autocomplete="on">
+
+      <!-- ===================== STEP 1: RELATIONSHIP ===================== -->
+      <section class="step" data-title="Relationship" data-desc="Tell us how you'll be working with CredPal. This helps us apply the right level of review.">
+        <div class="card">
+          <h3>The relationship</h3>
+          <p class="sub">If a CredPal staff member invited you, their name goes under "CredPal contact".</p>
+          <div class="grid">
+            <div class="field">
+              <label class="req">Relationship type</label>
+              <select data-f="relationshipType" data-req>
+                <option value="">Select one</option>
+                <option>Vendor</option><option>Technology Provider</option><option>Service Provider</option>
+                <option>Business Partner</option><option>Referral Partner</option><option>Distribution Partner</option>
+                <option>Affiliate</option><option>Agent</option><option>Payment/Settlement Provider</option>
+                <option>Lending Partner</option><option>Collection/Recovery Partner</option><option>Professional Adviser</option>
+                <option>Data/Information Provider</option><option>Other</option>
+              </select>
+              <span class="err-msg">Pick a relationship type</span>
+            </div>
+            <div class="field" data-show-if="relationshipType=Other">
+              <label class="req">Describe the relationship</label>
+              <input type="text" data-f="relationshipOther" data-req>
+              <span class="err-msg">Please describe it</span>
+            </div>
+            <div class="field">
+              <label class="req">Service category</label>
+              <select data-f="serviceCategory" data-req>
+                <option value="">Select one</option>
+                <option>Software / IT services</option><option>Payments &amp; settlement</option><option>Lending / credit</option>
+                <option>Collections &amp; recovery</option><option>Marketing, referrals &amp; distribution</option>
+                <option>Professional services (legal, audit, advisory)</option><option>Data &amp; information services</option>
+                <option>Logistics &amp; delivery</option><option>Facilities &amp; office supplies</option><option>Other</option>
+              </select>
+              <span class="err-msg">Pick a category</span>
+            </div>
+            <div class="field full">
+              <label class="req">What service will you provide to CredPal?</label>
+              <textarea data-f="servicesDescription" data-req placeholder="e.g. Field recovery on overdue credit card accounts in Lagos and Ogun"></textarea>
+              <span class="err-msg">Tell us what you'll provide</span>
+            </div>
+            <div class="field full">
+              <label class="req">Purpose of the relationship</label>
+              <textarea data-f="purpose" data-req style="min-height:72px" placeholder="What CredPal gets from working with you"></textarea>
+              <span class="err-msg">Add the purpose</span>
+            </div>
+            <div class="field">
+              <label class="req">CredPal contact / business owner</label>
+              <input type="text" data-f="credpalContact" data-req placeholder="Full name">
+              <span class="err-msg">Who at CredPal are you working with?</span>
+            </div>
+            <div class="field">
+              <label>CredPal contact email</label>
+              <input type="email" data-f="credpalContactEmail" placeholder="name@credpal.com">
+              <span class="err-msg">Enter a valid email</span>
+            </div>
+            <div class="field">
+              <label class="req">Expected start date</label>
+              <input type="date" data-f="expectedStart" data-req>
+              <span class="err-msg">Add a start date</span>
+            </div>
+            <div class="field">
+              <label class="req">Expected duration</label>
+              <select data-f="expectedDuration" data-req>
+                <option value="">Select one</option>
+                <option>One-off engagement</option><option>Less than 6 months</option><option>6 to 12 months</option>
+                <option>1 to 2 years</option><option>More than 2 years</option><option>Ongoing / no fixed end</option>
+              </select>
+              <span class="err-msg">Pick a duration</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 2: ENTITY ===================== -->
+      <section class="step" data-title="Business details" data-desc="Your company's legal details, exactly as they appear on your registration documents.">
+        <div class="card">
+          <h3>Legal identity</h3>
+          <p class="sub">We check these against the corporate registry, so please match your certificate.</p>
+          <div class="grid">
+            <div class="field full">
+              <label class="req">Registered legal name</label>
+              <input type="text" data-f="legalName" data-req autocomplete="organization">
+              <span class="err-msg">Enter the legal name</span>
+            </div>
+            <div class="field">
+              <label>Trading / business name</label>
+              <input type="text" data-f="tradingName">
+              <span class="hint">If different from the legal name</span>
+            </div>
+            <div class="field">
+              <label>Former names</label>
+              <input type="text" data-f="formerNames" placeholder="Separate with commas">
+            </div>
+            <div class="field">
+              <label class="req">Entity type</label>
+              <select data-f="entityType" data-req>
+                <option value="">Select one</option>
+                <option>Private Limited Company</option><option>Public Limited Company</option><option>Partnership</option>
+                <option>LLP</option><option>Sole Proprietorship</option><option>Foreign Company</option>
+                <option>NGO/Non-profit</option><option>Trust</option><option>Government/Public Entity</option><option>Other</option>
+              </select>
+              <span class="err-msg">Pick an entity type</span>
+            </div>
+            <div class="field" data-show-if="entityType=Other">
+              <label class="req">Specify entity type</label>
+              <input type="text" data-f="entityTypeOther" data-req>
+              <span class="err-msg">Specify the entity type</span>
+            </div>
+            <div class="field">
+              <label class="req">Registration number</label>
+              <input type="text" data-f="regNumber" data-req placeholder="e.g. RC 1234567">
+              <span class="err-msg">Enter the registration number</span>
+            </div>
+            <div class="field">
+              <label class="req">Country of incorporation</label>
+              <select data-f="countryInc" data-req data-countries data-default="Nigeria"></select>
+              <span class="err-msg">Pick a country</span>
+            </div>
+            <div class="field">
+              <label class="req">Date of incorporation</label>
+              <input type="date" data-f="dateInc" data-req>
+              <span class="err-msg">Add the incorporation date</span>
+            </div>
+            <div class="field">
+              <label>Tax Identification Number (TIN)</label>
+              <input type="text" data-f="tin">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Contact &amp; operations</h3>
+          <p class="sub">Where you're registered, where you actually work from, and how we reach you.</p>
+          <div class="grid">
+            <div class="field full">
+              <label class="req">Registered address</label>
+              <textarea data-f="registeredAddress" data-req style="min-height:70px"></textarea>
+              <span class="err-msg">Enter the registered address</span>
+            </div>
+            <div class="field full">
+              <label class="check"><input type="checkbox" data-f="sameAddress" data-rv="Principal business address"><span>Our principal business address is the same as the registered address</span></label>
+            </div>
+            <div class="field full" data-show-if="sameAddress=No">
+              <label class="req">Principal business address</label>
+              <textarea data-f="principalAddress" data-req style="min-height:70px"></textarea>
+              <span class="err-msg">Enter the business address</span>
+            </div>
+            <div class="field">
+              <label class="req">Business email</label>
+              <input type="email" data-f="businessEmail" data-req autocomplete="email">
+              <span class="err-msg">Enter a valid email</span>
+            </div>
+            <div class="field">
+              <label class="req">Business telephone</label>
+              <input type="tel" data-f="businessPhone" data-req placeholder="+234 ..." autocomplete="tel">
+              <span class="err-msg">Enter a phone number</span>
+            </div>
+            <div class="field">
+              <label>Website</label>
+              <input type="url" data-f="website" placeholder="https://">
+            </div>
+            <div class="field full">
+              <label class="req">Nature of business</label>
+              <textarea data-f="natureOfBusiness" data-req style="min-height:70px" placeholder="Your main business activities"></textarea>
+              <span class="err-msg">Describe your business</span>
+            </div>
+            <div class="field full">
+              <label class="req">Countries of operation</label>
+              <div class="chips-wrap">
+                <select data-countries data-chip-src="countriesOfOperation"></select>
+                <button type="button" class="btn-add" style="padding:9px 16px" data-chip-add="countriesOfOperation">Add</button>
+              </div>
+              <div class="chips" data-f="countriesOfOperation" data-chips data-req></div>
+              <span class="err-msg">Add at least one country</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 3: DOCUMENTS ===================== -->
+      <section class="step" data-title="Corporate documents" data-desc="Upload your core registration documents. PDF, JPG or PNG, up to 5 MB each.">
+        <div class="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>We don't need financial statements, bank statements or utility bills at this stage. If your profile calls for more, our Compliance team will ask you directly. Licences go in the Regulatory step.</span>
+        </div>
+        <div class="card">
+          <h3>Registration documents</h3>
+          <p class="sub">Companies registered outside Nigeria can upload the equivalent from their home registry.</p>
+          <div class="grid">
+            <div class="field full">
+              <span class="lbl req">Certificate of Incorporation / Registration</span>
+              <div class="drop" data-drop><input type="file" data-f="docCOI" data-label="Certificate of Incorporation" data-req accept=".pdf,.jpg,.jpeg,.png"></div>
+              <span class="err-msg">Upload your certificate</span>
+            </div>
+            <div class="field full">
+              <span class="lbl req">Current CAC status report</span>
+              <span class="hint">Shows your current directors, shareholders and company status (or a registry extract for foreign companies)</span>
+              <div class="drop" data-drop><input type="file" data-f="docCAC" data-label="CAC Status Report" data-req accept=".pdf,.jpg,.jpeg,.png"></div>
+              <span class="err-msg">Upload your status report</span>
+            </div>
+            <div class="field full">
+              <span class="lbl">Memorandum &amp; Articles of Association / Constitution</span>
+              <span class="hint">Where applicable. Sole proprietorships and partnerships can skip this.</span>
+              <div class="drop" data-drop><input type="file" data-f="docConstitution" data-label="Constitution / MEMART" accept=".pdf,.jpg,.jpeg,.png"></div>
+            </div>
+            <div class="field full">
+              <span class="lbl">Anything else you'd like to include</span>
+              <div class="drop" data-drop><input type="file" data-f="docOther" data-label="Other supporting document" accept=".pdf,.jpg,.jpeg,.png"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 4: OWNERSHIP & UBO ===================== -->
+      <section class="step" data-title="Ownership &amp; UBOs" data-desc="Who owns the business, and the real people who ultimately own or control it.">
+        <div class="card">
+          <h3>Ownership structure</h3>
+          <p class="sub">Give us the shape of your ownership first.</p>
+          <div class="grid">
+            <div class="field full">
+              <label class="req">How is the business owned?</label>
+              <select data-f="ownershipStructure" data-req>
+                <option value="">Select one</option>
+                <option>Directly by individuals</option>
+                <option>Through one or more companies (layered)</option>
+                <option>Publicly listed company</option>
+                <option>Government-owned</option>
+                <option>Other</option>
+              </select>
+              <span class="err-msg">Pick one</span>
+            </div>
+            <div class="field">
+              <span class="lbl req">Any shares held by a nominee?</span>
+              <div class="seg" data-f="hasNominee" data-opts="Yes|No" data-req></div>
+              <span class="err-msg">Choose an answer</span>
+            </div>
+            <div class="field">
+              <span class="lbl req">Any trust or foundation in the ownership?</span>
+              <div class="seg" data-f="hasTrust" data-opts="Yes|No" data-req></div>
+              <span class="err-msg">Choose an answer</span>
+            </div>
+            <div class="field full" data-show-if="ownershipStructure=Through one or more companies (layered)">
+              <span class="lbl req">Ownership chart</span>
+              <span class="hint">A simple diagram from the top-level individuals down to your company is fine</span>
+              <div class="drop" data-drop><input type="file" data-f="ownershipChart" data-label="Ownership chart" data-req accept=".pdf,.jpg,.jpeg,.png"></div>
+              <span class="err-msg">Upload an ownership chart</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Direct shareholders <span class="tag">Required</span></h3>
+          <p class="sub">Everyone (person or company) who holds shares in your business directly. If a shareholder is a company, tell us who owns that company in "Owned by".</p>
+          <div data-repeat="shareholders" data-min="1" data-tpl="tpl-shareholder" data-noun="shareholder"></div>
+        </div>
+
+        <div class="card">
+          <h3>Ultimate beneficial owners <span class="tag">Required</span></h3>
+          <p class="sub">The natural persons who own 5% or more, or who control the business in any other way. Trace through any companies until you reach real people.</p>
+          <div data-repeat="ubos" data-min="1" data-tpl="tpl-ubo" data-noun="beneficial owner"></div>
+          <div class="field" style="margin-top:8px">
+            <label class="check"><input type="checkbox" data-f="uboDeclaration" data-req><span>The information provided about the entity's ownership and ultimate beneficial ownership is complete and accurate to the best of our knowledge.</span></label>
+            <span class="err-msg">Please confirm this declaration</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 5: PEOPLE ===================== -->
+      <section class="step" data-title="Directors &amp; representative" data-desc="Your board, and the person authorised to deal with CredPal on your behalf.">
+        <div class="card">
+          <h3>Directors <span class="tag">Required</span></h3>
+          <p class="sub">List every current director. They'll be included in our routine sanctions and PEP screening.</p>
+          <div data-repeat="directors" data-min="1" data-tpl="tpl-director" data-noun="director"></div>
+        </div>
+
+        <div class="card" data-scope="authRep">
+          <h3>Authorised representative</h3>
+          <p class="sub">The person who can act for your business with CredPal. This is usually the person completing this form.</p>
+          <div class="grid">
+            <div class="field"><label class="req">Full name</label><input type="text" data-f="repName" data-req autocomplete="name"><span class="err-msg">Enter a name</span></div>
+            <div class="field"><label class="req">Position</label><input type="text" data-f="repPosition" data-req autocomplete="organization-title"><span class="err-msg">Enter a position</span></div>
+            <div class="field"><label class="req">Corporate email</label><input type="email" data-f="repEmail" data-req><span class="err-msg">Enter a valid email</span></div>
+            <div class="field"><label class="req">Telephone</label><input type="tel" data-f="repPhone" data-req><span class="err-msg">Enter a phone number</span></div>
+            <div class="field"><label class="req">ID type</label><select data-f="repIdType" data-req data-idtypes></select><span class="err-msg">Pick an ID type</span></div>
+            <div class="field"><label class="req">ID number</label><input type="text" data-f="repIdNumber" data-req><span class="err-msg">Enter the ID number</span></div>
+            <div class="field full"><span class="lbl req">ID document</span><div class="drop" data-drop><input type="file" data-f="repIdDoc" data-label="Authorised Rep ID" data-req accept=".pdf,.jpg,.jpeg,.png"></div><span class="err-msg">Upload the ID</span></div>
+            <div class="field"><label class="req">Basis of authority</label>
+              <select data-f="repAuthority" data-req>
+                <option value="">Select one</option><option>Director of the company</option><option>Board resolution</option>
+                <option>Authorisation letter</option><option>Corporate mandate</option><option>Power of attorney</option>
+              </select><span class="err-msg">Pick one</span></div>
+            <div class="field"><label class="req">Date authority started</label><input type="date" data-f="repAuthorityDate" data-req><span class="err-msg">Add a date</span></div>
+            <div class="field full" data-show-if="repAuthority=Board resolution|Authorisation letter|Corporate mandate|Power of attorney">
+              <span class="lbl req">Evidence of authority</span>
+              <div class="drop" data-drop><input type="file" data-f="repAuthorityDoc" data-label="Evidence of authority" data-req accept=".pdf,.jpg,.jpeg,.png"></div>
+              <span class="err-msg">Upload the evidence of authority</span>
+            </div>
+            <div class="field full"><span class="lbl req">Is this person a politically exposed person (PEP)?</span><div class="seg" data-f="repPep" data-opts="Yes|No" data-req></div><span class="hint">A PEP holds, or recently held, a prominent public role, or is a close family member or associate of someone who does.</span><span class="err-msg">Choose an answer</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 6: QUESTIONNAIRE ===================== -->
+      <section class="step" data-title="Service questionnaire" data-desc="A few yes/no questions about what the work will involve. Answer for the services you'll provide to CredPal.">
+        <div class="card">
+          <div class="q"><div class="qt"><b>Q2</b>Will you receive, hold, transfer or settle funds?</div><div class="seg" data-f="q2" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q3</b>Will you have access to customer funds?</div><div class="seg" data-f="q3" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q4</b>Will you process customer personal data?</div><div class="seg" data-f="q4" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q5</b>Will you deal directly with CredPal customers?</div><div class="seg" data-f="q5" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q6</b>Will you originate or facilitate loans?</div><div class="seg" data-f="q6" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q7</b>Will you carry out customer identification / KYC?</div><div class="seg" data-f="q7" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q8</b>Will you carry out collection or recovery activities?</div><div class="seg" data-f="q8" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q9</b>Will you process payments or settlements?</div><div class="seg" data-f="q9" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q10</b>Will the work involve cryptocurrency or digital assets?</div><div class="seg" data-f="q10" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q11</b>Will the work involve cross-border transactions?</div><div class="seg" data-f="q11" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt"><b>Q12</b>Will you subcontract any material part of the service?</div><div class="seg" data-f="q12" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+        </div>
+        <div class="card" data-show-if="q12=Yes">
+          <h3>Subcontractors</h3>
+          <p class="sub">Tell us who they are, what they'll do, and where they're based.</p>
+          <div data-repeat="subcontractors" data-min="1" data-tpl="tpl-sub" data-noun="subcontractor"></div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 7: REGULATORY ===================== -->
+      <section class="step" data-title="Regulatory" data-desc="Licences, registrations or approvals that apply to your business or to the service you'll provide.">
+        <div class="card">
+          <div class="field">
+            <span class="lbl req">Is the entity, or any service it will provide to CredPal, subject to regulatory licensing, registration or approval?</span>
+            <div class="seg" data-f="regulated" data-opts="Yes|No|Unsure" data-req></div>
+            <span class="err-msg">Choose an answer</span>
+          </div>
+          <div class="field" data-show-if="regulated=Unsure" style="margin-top:18px">
+            <label class="req">Tell us a bit more</label>
+            <textarea data-f="regulatoryNotes" data-req placeholder="Describe the activity you're unsure about and we'll advise"></textarea>
+            <span class="err-msg">Add a short description</span>
+          </div>
+        </div>
+        <div class="card" data-show-if="regulated=Yes">
+          <h3>Licences &amp; registrations</h3>
+          <p class="sub">Add each one separately. We'll remind you before any of them expire.</p>
+          <div data-repeat="licences" data-min="1" data-tpl="tpl-licence" data-noun="licence"></div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 8: AML / PEP / DECLARATIONS ===================== -->
+      <section class="step" data-title="AML/CFT &amp; declarations" data-desc="Your anti-money-laundering controls, PEP disclosures, and the final sign-off.">
+        <div class="card">
+          <h3>AML/CFT controls</h3>
+          <p class="sub">Choose "Not applicable" where the law doesn't require it for your type of business.</p>
+          <div class="q"><div class="qt">Does the entity maintain AML/CFT policies and procedures for its business activities?</div><div class="seg" data-f="aml1" data-opts="Yes|No|Not Applicable" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Does the entity identify and carry out due diligence on customers or counterparties where the law requires it?</div><div class="seg" data-f="aml2" data-opts="Yes|No|Not Applicable" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Does the entity keep records of its beneficial owners and controlling persons?</div><div class="seg" data-f="aml3" data-opts="Yes|No|Not Applicable" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Does the entity have processes for identifying applicable sanctions restrictions?</div><div class="seg" data-f="aml4" data-opts="Yes|No|Not Applicable" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Does the entity have procedures for identifying politically exposed persons?</div><div class="seg" data-f="aml5" data-opts="Yes|No|Not Applicable" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Does the entity have procedures for spotting and escalating suspicious transactions or activity?</div><div class="seg" data-f="aml6" data-opts="Yes|No|Not Applicable" data-req></div><span class="err-msg">Choose an answer</span></div>
+        </div>
+
+        <div class="card">
+          <h3>PEP declaration</h3>
+          <p class="sub">Having a PEP connected to your business won't by itself stop onboarding. It just means we'll ask a few more questions.</p>
+          <div class="q"><div class="qt">Is any beneficial owner a politically exposed person?</div><div class="seg" data-f="pep1" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Is any director a politically exposed person?</div><div class="seg" data-f="pep2" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Is any other controlling person a politically exposed person?</div><div class="seg" data-f="pep3" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="q"><div class="qt">Is the authorised representative a politically exposed person?</div><div class="seg" data-f="pep4" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+          <div class="field" data-show-if="pep1|pep2|pep3|pep4=Yes" style="margin-top:14px">
+            <label class="req">PEP details</label>
+            <textarea data-f="pepDetails" data-req placeholder="Name, public role or position, and their connection to the business"></textarea>
+            <span class="err-msg">Add the PEP details</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Declarations &amp; sign-off</h3>
+          <p class="sub">Please read each one before ticking.</p>
+          <div style="display:grid;gap:12px">
+            <div class="field"><label class="check"><input type="checkbox" data-f="notifyAgreement" data-req><span>We will tell CredPal promptly about any material change to our ownership, directors, beneficial owners, regulatory status or sanctions status, or about any material AML/CFT issue.</span></label><span class="err-msg">Please accept this to continue</span></div>
+            <div class="field"><label class="check"><input type="checkbox" data-f="dataConsent" data-req><span>We consent to CredPal processing the personal data in this form, and verifying it with registries, identity providers and screening services, for due diligence, AML/CFT and regulatory purposes.</span></label><span class="err-msg">Please give consent to continue</span></div>
+            <div class="field"><label class="check"><input type="checkbox" data-f="attestation" data-req><span>Everything in this application is true, complete and accurate. We understand that false or misleading information may lead to rejection or termination of the relationship.</span></label><span class="err-msg">Please confirm to continue</span></div>
+          </div>
+          <div class="grid" style="margin-top:18px">
+            <div class="field"><label class="req">Signed by (full name)</label><input type="text" data-f="signatoryName" data-req><span class="err-msg">Enter your full name</span></div>
+            <div class="field"><label class="req">Position</label><input type="text" data-f="signatoryPosition" data-req><span class="err-msg">Enter your position</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 9: REVIEW ===================== -->
+      <section class="step" data-title="Review &amp; submit" data-desc="Have one last look. Use Edit on any section to change something.">
+        <div id="review"></div>
+      </section>
+
+      <div class="nav" id="nav">
+        <button type="button" class="btn btn-ghost" id="back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>Back</button>
+        <span class="count" id="count"></span>
+        <button type="button" class="btn btn-primary" id="next">Continue
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+    </form>
+
+    <div id="done" class="card success is-hidden">
+      <div class="tick"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2>Application received</h2>
+      <p>Thank you. Our Compliance team will review your details and get back to you by email.</p>
+      <div class="ref" id="refNo"></div>
+      <p style="font-size:13px">Keep this reference handy. You'll need it if we contact you or you contact us.</p>
+    </div>
+  </main>
+</div>
+
+<!-- ===================== TEMPLATES ===================== -->
+<template id="tpl-shareholder">
+  <div class="grid">
+    <div class="field"><label class="req">Name</label><input type="text" data-f="name" data-req><span class="err-msg">Enter a name</span></div>
+    <div class="field"><label class="req">Shareholder type</label>
+      <select data-f="holderType" data-req><option value="">Select one</option><option>Individual</option><option>Company</option><option>Trust / Foundation</option><option>Nominee</option><option>Government</option><option>Other</option></select>
+      <span class="err-msg">Pick a type</span></div>
+    <div class="field" data-show-if="holderType=Company|Trust / Foundation|Nominee|Government|Other"><label>Registration number</label><input type="text" data-f="regNumber"></div>
+    <div class="field"><label class="req">Country</label><select data-f="country" data-req data-countries data-default="Nigeria"></select><span class="err-msg">Pick a country</span></div>
+    <div class="field"><label class="req">Ownership %</label><input type="number" data-f="ownershipPct" data-req data-pct min="0" max="100" step="0.01"><span class="err-msg">Enter a percentage between 0 and 100</span></div>
+    <div class="field"><label class="req">Voting rights %</label><input type="number" data-f="votingPct" data-req data-pct min="0" max="100" step="0.01"><span class="err-msg">Enter a percentage between 0 and 100</span></div>
+    <div class="field"><label class="req">Nature of control</label>
+      <select data-f="control" data-req><option value="">Select one</option><option>Shareholding</option><option>Voting rights</option><option>Right to appoint/remove directors</option><option>Significant influence</option><option>Other</option></select>
+      <span class="err-msg">Pick one</span></div>
+    <div class="field" data-show-if="holderType=Company|Trust / Foundation|Nominee|Other"><label class="req">Owned by</label><input type="text" data-f="ownedBy" data-req placeholder="Who owns or controls this shareholder?"><span class="err-msg">Tell us who sits above this shareholder</span></div>
+  </div>
+</template>
+
+<template id="tpl-ubo">
+  <div class="grid">
+    <div class="field"><label class="req">Full legal name</label><input type="text" data-f="fullName" data-req><span class="err-msg">Enter a name</span></div>
+    <div class="field"><label class="req">Date of birth</label><input type="date" data-f="dob" data-req><span class="err-msg">Add a date of birth</span></div>
+    <div class="field"><label class="req">Nationality</label><select data-f="nationality" data-req data-countries data-default="Nigeria"></select><span class="err-msg">Pick a nationality</span></div>
+    <div class="field"><label class="req">Country of residence</label><select data-f="residence" data-req data-countries data-default="Nigeria"></select><span class="err-msg">Pick a country</span></div>
+    <div class="field full"><label class="req">Residential address</label><input type="text" data-f="address" data-req><span class="err-msg">Enter an address</span></div>
+    <div class="field"><label>Ownership %</label><input type="number" data-f="ownershipPct" data-pct min="0" max="100" step="0.01"><span class="hint">Direct or indirect, if applicable</span><span class="err-msg">Enter a percentage between 0 and 100</span></div>
+    <div class="field"><label class="req">Voting / control rights</label><input type="text" data-f="votingRights" data-req placeholder="e.g. 40% voting"><span class="err-msg">Describe their voting or control rights</span></div>
+    <div class="field"><label class="req">Nature of control</label>
+      <select data-f="control" data-req><option value="">Select one</option><option>Direct shareholding</option><option>Indirect shareholding</option><option>Voting rights</option><option>Right to appoint/remove directors</option><option>Senior managing official</option><option>Other means of control</option></select>
+      <span class="err-msg">Pick one</span></div>
+    <div class="field"><label class="req">Source of this ownership information</label>
+      <select data-f="infoSource" data-req><option value="">Select one</option><option>Register of members</option><option>CAC / registry records</option><option>Shareholders' agreement</option><option>Self-declaration</option><option>Other</option></select>
+      <span class="err-msg">Pick one</span></div>
+    <div class="field"><label class="req">ID type</label><select data-f="idType" data-req data-idtypes></select><span class="err-msg">Pick an ID type</span></div>
+    <div class="field"><label class="req">ID number</label><input type="text" data-f="idNumber" data-req><span class="err-msg">Enter the ID number</span></div>
+    <div class="field full"><span class="lbl req">ID document</span><div class="drop" data-drop><input type="file" data-f="idDoc" data-label="UBO ID" data-req accept=".pdf,.jpg,.jpeg,.png"></div><span class="err-msg">Upload the ID</span></div>
+    <div class="field full"><span class="lbl req">Politically exposed person (PEP)?</span><div class="seg" data-f="pep" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+    <div class="field full" data-show-if="pep=Yes"><label class="req">PEP details</label><input type="text" data-f="pepDetails" data-req placeholder="Public role or position held, and when"><span class="err-msg">Add the PEP details</span></div>
+  </div>
+</template>
+
+<template id="tpl-director">
+  <div class="grid">
+    <div class="field"><label class="req">Full name</label><input type="text" data-f="fullName" data-req><span class="err-msg">Enter a name</span></div>
+    <div class="field"><label class="req">Position</label><input type="text" data-f="position" data-req placeholder="e.g. Managing Director"><span class="err-msg">Enter a position</span></div>
+    <div class="field"><label class="req">Nationality</label><select data-f="nationality" data-req data-countries data-default="Nigeria"></select><span class="err-msg">Pick a nationality</span></div>
+    <div class="field"><label class="req">Country of residence</label><select data-f="residence" data-req data-countries data-default="Nigeria"></select><span class="err-msg">Pick a country</span></div>
+    <div class="field"><label>Date of birth</label><input type="date" data-f="dob"></div>
+    <div class="field"><label class="req">ID type</label><select data-f="idType" data-req data-idtypes></select><span class="err-msg">Pick an ID type</span></div>
+    <div class="field"><label class="req">ID number</label><input type="text" data-f="idNumber" data-req><span class="err-msg">Enter the ID number</span></div>
+    <div class="field"><span class="lbl req">Politically exposed person (PEP)?</span><div class="seg" data-f="pep" data-opts="Yes|No" data-req></div><span class="err-msg">Choose an answer</span></div>
+    <div class="field full" data-show-if="pep=Yes"><label class="req">PEP details</label><input type="text" data-f="pepDetails" data-req placeholder="Public role or position held, and when"><span class="err-msg">Add the PEP details</span></div>
+    <div class="field full"><span class="lbl">ID document</span><div class="drop" data-drop><input type="file" data-f="idDoc" data-label="Director ID" accept=".pdf,.jpg,.jpeg,.png"></div></div>
+  </div>
+</template>
+
+<template id="tpl-sub">
+  <div class="grid">
+    <div class="field"><label class="req">Subcontractor name</label><input type="text" data-f="name" data-req><span class="err-msg">Enter a name</span></div>
+    <div class="field"><label class="req">Jurisdiction</label><select data-f="jurisdiction" data-req data-countries data-default="Nigeria"></select><span class="err-msg">Pick a country</span></div>
+    <div class="field full"><label class="req">Service they'll provide</label><input type="text" data-f="service" data-req><span class="err-msg">Describe the service</span></div>
+  </div>
+</template>
+
+<template id="tpl-licence">
+  <div class="grid">
+    <div class="field"><label class="req">Regulator</label>
+      <select data-f="regulator" data-req>
+        <option value="">Select one</option><option>Central Bank of Nigeria (CBN)</option><option>Securities and Exchange Commission (SEC)</option>
+        <option>Nigeria Data Protection Commission (NDPC)</option><option>Federal Competition and Consumer Protection Commission (FCCPC)</option>
+        <option>Nigerian Communications Commission (NCC)</option><option>National Insurance Commission (NAICOM)</option>
+        <option>State Money Lenders Authority</option><option>Other</option>
+      </select><span class="err-msg">Pick a regulator</span></div>
+    <div class="field" data-show-if="regulator=Other"><label class="req">Regulator name</label><input type="text" data-f="regulatorOther" data-req><span class="err-msg">Name the regulator</span></div>
+    <div class="field"><label class="req">Licence / registration type</label><input type="text" data-f="licenceType" data-req placeholder="e.g. Payment Service Provider"><span class="err-msg">Enter the licence type</span></div>
+    <div class="field"><label class="req">Licence number</label><input type="text" data-f="licenceNumber" data-req><span class="err-msg">Enter the licence number</span></div>
+    <div class="field"><label class="req">Regulatory jurisdiction</label><select data-f="jurisdiction" data-req data-countries data-default="Nigeria"></select><span class="err-msg">Pick a country</span></div>
+    <div class="field"><label class="req">Issue date</label><input type="date" data-f="issueDate" data-req><span class="err-msg">Add the issue date</span></div>
+    <div class="field"><label>Expiry date</label><input type="date" data-f="expiryDate"><span class="hint">Leave blank if it doesn't expire</span></div>
+    <div class="field full"><span class="lbl req">Licence document</span><div class="drop" data-drop><input type="file" data-f="licenceDoc" data-label="Regulatory licence" data-req accept=".pdf,.jpg,.jpeg,.png"></div><span class="err-msg">Upload the licence</span></div>
+  </div>
+</template>
+
+<div class="overlay" id="overlay"><div class="ov-box"><div class="spin"></div><h4>Submitting your application</h4><p id="ovMsg">Uploading your documents. Please keep this page open.</p></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   CONFIG: paste your Apps Script Web App URL here
+   (not needed if this page is served by Apps Script itself)
+   ========================================================= */
+const SCRIPT_URL = 'PASTE_YOUR_WEB_APP_URL_HERE';
+const MAX_FILE_MB = 5;
+const MAX_TOTAL_MB = 30;
+
+const COUNTRIES = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Republic)","Congo (DR)","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Cyprus","Czechia","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","São Tomé and Príncipe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+const ID_TYPES = ["NIN slip / National ID card","International passport","Driver's licence","Permanent voter's card","Foreign national ID","Other government-issued ID"];
+
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+let uid = 0;
+const form = $('#kyb');
+const steps = $$('section.step', form);
+let cur = 0, maxVisited = 0;
+
+/* ---------- builders ---------- */
+function hydrate(root){
+  $$('select[data-countries]', root).forEach(s=>{
+    if (s.options.length) return;
+    const def = s.dataset.default || '';
+    s.innerHTML = '<option value="">Select country</option>' + COUNTRIES.map(c=>`<option${c===def?' selected':''}>${c}</option>`).join('');
+  });
+  $$('select[data-idtypes]', root).forEach(s=>{
+    if (s.options.length) return;
+    s.innerHTML = '<option value="">Select ID type</option>' + ID_TYPES.map(c=>`<option>${c}</option>`).join('');
+  });
+  $$('.seg[data-opts]', root).forEach(seg=>{
+    if (seg.children.length) return;
+    const nm = seg.dataset.f + '_' + (++uid);
+    seg.innerHTML = seg.dataset.opts.split('|').map(o=>`<label><input type="radio" name="${nm}" value="${o}"><span>${o}</span></label>`).join('');
+  });
+  $$('[data-drop]', root).forEach(d=>{
+    if (d.querySelector('.ic')) return;
+    d.insertAdjacentHTML('beforeend', `<div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M20 16v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/></svg></div><div class="tx"><b>Click to upload or drag a file here</b><small>PDF, JPG or PNG · max ${MAX_FILE_MB} MB</small></div>`);
+    const inp = d.querySelector('input');
+    inp.addEventListener('change', ()=>fileChosen(d, inp));
+    ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,()=>d.classList.add('over')));
+    ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,()=>d.classList.remove('over')));
+  });
+}
+
+function fileChosen(d, inp){
+  const f = inp.files[0];
+  const tx = d.querySelector('.tx');
+  if (!f){ d.classList.remove('has'); tx.innerHTML = `<b>Click to upload or drag a file here</b><small>PDF, JPG or PNG · max ${MAX_FILE_MB} MB</small>`; return; }
+  if (f.size > MAX_FILE_MB*1024*1024){
+    inp.value=''; toast(`"${f.name}" is over ${MAX_FILE_MB} MB. Please compress it and try again.`); fileChosen(d, inp); return;
+  }
+  d.classList.add('has');
+  tx.innerHTML = `<b>${esc(f.name)}</b><small>${(f.size/1024/1024).toFixed(2)} MB · click to replace</small>`;
+  d.closest('.field')?.classList.remove('invalid');
+}
+
+/* ---------- repeaters ---------- */
+function setupRepeat(box){
+  const add = document.createElement('button');
+  add.type='button'; add.className='btn-add';
+  add.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Add ${box.dataset.noun}`;
+  add.addEventListener('click', ()=>addItem(box));
+  box.after(add);
+  box._add = add;
+  const min = +box.dataset.min || 0;
+  for (let i=0;i<Math.max(min,1);i++) addItem(box, true);
+}
+function addItem(box, silent){
+  const tpl = document.getElementById(box.dataset.tpl);
+  const item = document.createElement('div');
+  item.className='rep-item';
+  item.innerHTML = `<div class="rep-head"><h4><span class="n"></span><span class="t"></span></h4><button type="button" class="btn-x">Remove</button></div>`;
+  item.appendChild(tpl.content.cloneNode(true));
+  item.querySelector('.btn-x').addEventListener('click', ()=>{
+    const min = +box.dataset.min || 0;
+    if (box.children.length <= Math.max(min,1)){ toast(`You need at least one ${box.dataset.noun}.`); return; }
+    item.remove(); renumber(box);
+  });
+  box.appendChild(item);
+  hydrate(item); renumber(box); updateConditions();
+  if (!silent) item.querySelector('input,select')?.focus();
+}
+function renumber(box){
+  $$(':scope > .rep-item', box).forEach((it,i)=>{
+    it.querySelector('.n').textContent = i+1;
+    const noun = box.dataset.noun;
+    it.querySelector('.t').textContent = noun.charAt(0).toUpperCase()+noun.slice(1)+' '+(i+1);
+  });
+}
+
+/* ---------- chips ---------- */
+function setupChips(){
+  $$('[data-chip-add]').forEach(btn=>{
+    const key = btn.dataset.chipAdd;
+    const src = $(`[data-chip-src="${key}"]`);
+    const box = $(`[data-f="${key}"]`);
+    box._vals = ['Nigeria'];
+    const render = ()=>{
+      box.innerHTML = box._vals.map((v,i)=>`<span class="chip">${esc(v)}<button type="button" aria-label="Remove ${esc(v)}" data-i="${i}">×</button></span>`).join('');
+    };
+    btn.addEventListener('click', ()=>{
+      const v = src.value; if (!v) return;
+      if (!box._vals.includes(v)) box._vals.push(v);
+      src.value=''; render(); box.closest('.field').classList.remove('invalid');
+    });
+    src.addEventListener('change', ()=>btn.click());
+    box.addEventListener('click', e=>{
+      const b = e.target.closest('button[data-i]'); if (!b) return;
+      box._vals.splice(+b.dataset.i,1); render();
+    });
+    render();
+  });
+}
+
+/* ---------- values & conditions ---------- */
+function valueOf(el){
+  if (el.classList.contains('seg')) return el.querySelector('input:checked')?.value || '';
+  if (el.hasAttribute('data-chips')) return (el._vals||[]).join(', ');
+  if (el.type === 'checkbox') return el.checked ? 'Yes' : 'No';
+  if (el.type === 'file') return el.files[0] ? el.files[0].name : '';
+  return (el.value||'').trim();
+}
+function findCtl(key, from){
+  const item = from.closest('.rep-item');
+  if (item){ const c = item.querySelector(`[data-f="${key}"]`); if (c) return c; }
+  return $$(`[data-f="${key}"]`, form).find(c=>!c.closest('.rep-item')) || null;
+}
+function updateConditions(){
+  // run twice so nested conditions settle
+  for (let pass=0; pass<2; pass++){
+    $$('[data-show-if]', form).forEach(el=>{
+      const [keys, vals] = el.dataset.showIf.split('=');
+      const want = vals.split('|');
+      const show = keys.split('|').some(k=>{
+        const c = findCtl(k, el); if (!c) return false;
+        return want.includes(valueOf(c));
+      });
+      el.classList.toggle('is-hidden', !show);
+    });
+  }
+}
+function isHidden(el){
+  // hidden by a condition (ignore the step wrappers, which are hidden just because they're not on screen)
+  let n = el.closest('.is-hidden');
+  while (n){ if (!n.matches('section.step')) return true; n = n.parentElement && n.parentElement.closest('.is-hidden'); }
+  return false;
+}
+
+/* ---------- validation ---------- */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function validateStep(i){
+  let first = null;
+  const sec = steps[i];
+  $$('[data-f]', sec).forEach(el=>{
+    if (el.hasAttribute('data-chip-src')) return;
+    const field = el.closest('.field') || el.closest('.q');
+    if (!field) return;
+    if (isHidden(el)) { field.classList.remove('invalid'); return; }
+    const v = valueOf(el);
+    let bad = false;
+    if (el.hasAttribute('data-req')){
+      if (el.type === 'checkbox') bad = !el.checked;
+      else bad = !v;
+    }
+    if (!bad && v && el.type === 'email') bad = !EMAIL_RE.test(v);
+    if (!bad && v && el.hasAttribute('data-pct')){ const n = parseFloat(v); bad = isNaN(n) || n<0 || n>100; }
+    field.classList.toggle('invalid', bad);
+    if (bad && !first) first = field;
+  });
+  if (first){
+    first.scrollIntoView({behavior:'smooth', block:'center'});
+    toast('A few fields need your attention.');
+    return false;
+  }
+  // soft check: shareholders total
+  if (sec.contains($('[data-repeat="shareholders"]'))){
+    const tot = $$('[data-repeat="shareholders"] [data-f="ownershipPct"]').reduce((a,e)=>a+(parseFloat(e.value)||0),0);
+    if (tot > 100.01){ toast(`Shareholdings add up to ${tot.toFixed(2)}%. They can't exceed 100%.`); return false; }
+  }
+  return true;
+}
+form.addEventListener('input', e=>{ const f=e.target.closest('.field,.q'); if (f) f.classList.remove('invalid'); });
+form.addEventListener('change', e=>{ const f=e.target.closest('.field,.q'); if (f) f.classList.remove('invalid'); updateConditions(); });
+
+/* ---------- navigation ---------- */
+function buildStepper(){
+  $('#stepper').innerHTML = steps.map((s,i)=>`<li data-i="${i}"><span class="dot">${i+1}</span><span>${s.dataset.title}</span></li>`).join('');
+  $('#stepper').addEventListener('click', e=>{
+    const li = e.target.closest('li'); if (!li) return;
+    const i = +li.dataset.i;
+    if (i <= maxVisited && i !== cur){ if (i > cur && !validateStep(cur)) return; go(i); }
+  });
+}
+function go(i){
+  steps.forEach((s,k)=>s.classList.toggle('is-hidden', k!==i));
+  cur = i; maxVisited = Math.max(maxVisited, i);
+  const s = steps[i];
+  let head = s.querySelector('.step-head');
+  if (!head){
+    head = document.createElement('div'); head.className='step-head';
+    head.innerHTML = `<span class="eyebrow">Step ${i+1} of ${steps.length}</span><h2>${s.dataset.title}</h2><p>${s.dataset.desc}</p>`;
+    s.prepend(head);
+  }
+  $$('#stepper li').forEach((li,k)=>{
+    li.classList.toggle('active', k===i);
+    li.classList.toggle('done', k!==i && k<=maxVisited);
+    li.querySelector('.dot').innerHTML = (k<i || (k<=maxVisited && k!==i)) ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : (k+1);
+  });
+  $('#bar').style.width = ((i+1)/steps.length*100)+'%';
+  $('#mStep').textContent = `Step ${i+1} of ${steps.length} · ${s.dataset.title.replace('&amp;','&')}`;
+  $('#count').textContent = `${i+1} / ${steps.length}`;
+  $('#back').style.visibility = i===0 ? 'hidden' : 'visible';
+  const last = i===steps.length-1;
+  $('#next').innerHTML = last
+    ? 'Submit application <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>'
+    : 'Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
+  if (last) buildReview();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+$('#next').addEventListener('click', ()=>{
+  if (cur === steps.length-1) return submit();
+  if (!validateStep(cur)) return;
+  go(cur+1);
+});
+$('#back').addEventListener('click', ()=>{ if (cur>0) go(cur-1); });
+
+/* ---------- review ---------- */
+function labelFor(el){
+  const field = el.closest('.field');
+  if (field){ const l = field.querySelector(':scope > label:not(.check), :scope > .lbl'); if (l) return l.textContent.trim(); }
+  const q = el.closest('.q'); if (q) return q.querySelector('.qt').textContent.trim();
+  const chk = el.closest('.check'); if (chk) return chk.querySelector('span').textContent.trim();
+  return el.dataset.f;
+}
+function rowsFor(scope, inItem){
+  return $$('[data-f]', scope).filter(el=>{
+    if (el.hasAttribute('data-chip-src') || isHidden(el)) return false;
+    return inItem ? el.closest('.rep-item')===scope : !el.closest('.rep-item');
+  }).map(el=>{
+    let v = valueOf(el);
+    const long = el.tagName==='TEXTAREA' || el.type==='checkbox' || el.closest('.q');
+    const lbl = el.dataset.rv || (el.type==='checkbox' ? 'Declaration' : labelFor(el));
+    if (el.type==='checkbox') v = (v==='Yes'?'✓ ':'✗ ') + labelFor(el);
+    return `<div class="rv-row${long?' full':''}"><dt>${esc(lbl)}</dt><dd>${v?esc(v):'<span class="empty">Not provided</span>'}</dd></div>`;
+  }).join('');
+}
+function buildReview(){
+  let html = '';
+  steps.slice(0,-1).forEach((s,i)=>{
+    let body = rowsFor(s, false);
+    $$('[data-repeat]', s).forEach(box=>{
+      if (isHidden(box)) return;
+      $$(':scope > .rep-item', box).forEach((it,k)=>{
+        const noun = box.dataset.noun;
+        body += `<div class="rv-sub">${noun.charAt(0).toUpperCase()+noun.slice(1)} ${k+1}</div>` + rowsFor(it, true);
+      });
+    });
+    html += `<div class="card rv-sec"><div class="rv-top"><h3>${s.dataset.title}</h3><button type="button" class="rv-edit" data-go="${i}">Edit</button></div><dl class="rv-grid">${body}</dl></div>`;
+  });
+  $('#review').innerHTML = html;
+  $$('#review [data-go]').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.go)));
+}
+
+/* ---------- payload ---------- */
+function readFile(f){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res({name:f.name, type:f.type||'application/octet-stream', data:String(r.result).split(',')[1]});
+    r.onerror = rej; r.readAsDataURL(f);
+  });
+}
+async function collect(scope, inItem){
+  const o = {};
+  for (const el of $$('[data-f]', scope)){
+    if (el.hasAttribute('data-chip-src')) continue;
+    if (inItem ? el.closest('.rep-item')!==scope : !!el.closest('.rep-item')) continue;
+    const k = el.dataset.f;
+    if (isHidden(el)){ o[k] = ''; continue; }
+    if (el.type === 'file'){
+      o[k] = el.files[0] ? Object.assign(await readFile(el.files[0]), {label: el.dataset.label||k}) : '';
+    } else o[k] = valueOf(el);
+  }
+  return o;
+}
+async function buildPayload(){
+  const data = await collect(form, false);
+  data.repeats = {};
+  for (const box of $$('[data-repeat]', form)){
+    const key = box.dataset.repeat;
+    if (isHidden(box)){ data.repeats[key] = []; continue; }
+    data.repeats[key] = [];
+    for (const it of $$(':scope > .rep-item', box)) data.repeats[key].push(await collect(it, true));
+  }
+  if (data.sameAddress === 'Yes') data.principalAddress = data.registeredAddress;
+  data.meta = {submittedFrom: location.href.split('?')[0], userAgent: navigator.userAgent, clientTime: new Date().toISOString()};
+  return data;
+}
+
+async function submit(){
+  // re-validate everything
+  for (let i=0;i<steps.length-1;i++){ if (!validateStep(i)){ go(i); setTimeout(()=>validateStep(i),350); return; } }
+  const total = $$('input[type=file]', form).filter(f=>!isHidden(f) && f.files[0]).reduce((a,f)=>a+f.files[0].size,0);
+  if (total > MAX_TOTAL_MB*1024*1024){ toast(`Your files add up to ${(total/1048576).toFixed(1)} MB. Please keep the total under ${MAX_TOTAL_MB} MB.`); return; }
+
+  const btn = $('#next'); btn.disabled = true;
+  $('#overlay').classList.add('on');
+  try{
+    const payload = await buildPayload();
+    $('#ovMsg').textContent = 'Sending your application securely…';
+    const res = await send(payload);
+    if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Unknown error');
+    form.classList.add('is-hidden');
+    $('#done').classList.remove('is-hidden');
+    $('#refNo').textContent = res.ref;
+    $('#bar').style.width = '100%';
+    $$('#stepper li').forEach(li=>{ li.classList.add('done'); li.classList.remove('active'); });
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch(err){
+    toast('We couldn\'t submit your application: ' + err.message + '. Please try again.');
+    console.error(err);
+  } finally {
+    $('#overlay').classList.remove('on'); btn.disabled = false;
+  }
+}
+function send(payload){
+  // Served from Apps Script (HtmlService)
+  if (typeof google !== 'undefined' && google.script && google.script.run){
+    return new Promise((res,rej)=>google.script.run.withSuccessHandler(res).withFailureHandler(e=>rej(new Error(e.message||e))).submitApplication(payload));
+  }
+  // Hosted elsewhere (GitHub Pages, website, etc.)
+  if (!SCRIPT_URL || SCRIPT_URL.startsWith('PASTE_')) return Promise.reject(new Error('the form is not connected to Google Sheets yet (SCRIPT_URL is empty)'));
+  return fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)}).then(r=>r.json());
+}
+
+/* ---------- utils ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),4200); }
+
+/* ---------- init ---------- */
+hydrate(document);
+$$('[data-repeat]').forEach(setupRepeat);
+setupChips();
+buildStepper();
+updateConditions();
+go(0);
+</script>
+</body>
+</html>
